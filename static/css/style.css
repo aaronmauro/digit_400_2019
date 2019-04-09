@@ -1,0 +1,12 @@
+h1 {
+    color:red; /* this is a css comment! */
+    font-family: fantasy;
+}
+
+.loop { /*class selector!*/
+    color:#ff8912;
+}
+
+#basic {
+    color:#ff6896;
+}

@@ -1,0 +1,18 @@
+{% extends "header.html" %}
+
+{% block body %}
+
+<div class="container">
+
+    <br>
+    <h4>File Uploads</h4>
+    <br>
+    <form enctype="multipart/form-data" class="form-inline" method="post">
+        <input type="file" class="form-control" name="file">
+        &nbsp;
+        <input class="btn btn-secondary" type="submit" value="Upload">
+    </form>
+
+</div>
+
+{% endblock %}

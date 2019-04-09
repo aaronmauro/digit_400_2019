@@ -1,15 +1,25 @@
-from flask import Flask, render_template, url_for, flash, redirect, request, session, make_response
+from flask import Flask, render_template, url_for, flash, redirect, request, session, make_response, send_file
 from wtforms import Form, BooleanField, TextField, PasswordField, validators
 from passlib.hash import sha256_crypt
 from pymysql import escape_string as thwart
 from functools import wraps
 from datetime import datetime, timedelta
 import gc
-import os, sys; sys.path.append(os.path.dirname(os.path.realpath(__file__))) 
+import os, sys; sys.path.append(os.path.dirname(os.path.realpath(__file__)))
+from werkzeug.utils import secure_filename
 from content import Content
 from db_connect import connection
 
+UPLOAD_FOLDER = "/var/www/FlaskApp/FlaskApp/uploads"
+
+ALLOWED_EXTENSIONS = set(["txt", "pdf", "png", "jpg", "jpeg", "gif"])
+
 app = Flask(__name__)
+
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+
+def allowed_file(filename):
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def login_required(f):
     @wraps(f)
@@ -174,8 +184,52 @@ def about():
     flash("Learn more about DIGIT 400")
     return render_template("about.html")
 
-## Site Map
+@app.route('/welcome/')
+def welcome_to_jinja():
+    try:
+        #This is where all the python goes!
+        
+        def my_function():
+            output = ["DIGIT 400 is good", "Python, Java, php, SQL, C++","<p><strong>hello world!</strong></p>", 42, "42"]
+            return output
+        
+        output = my_function()
+        
+        return render_template("templating_demo.html", output = output)
+    except Exception as e:
+        return str(e) # remove for production
+    
+@app.route("/uploads/", methods=["GET","POST"])
+@login_required
+def upload_file():
+    try:
+        if request.method == "POST":
+            if "file" not in request.files:
+                flash("No file part")
+                return redirect(request.url)
+            file = request.files["file"]
+            
+            if file.filename == "":
+                flash("No selected file")
+                return redirect(request.url)
+            if file and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
+                flash("File "+ str(filename) +" upload successful!")
+                return render_template('uploads.html', filename = filename)
+        return render_template("uploads.html")
+    except Exception as e:
+        return str(e) # remove for production
 
+@app.route("/download/")
+@login_required
+def download():
+    try:
+        return send_file("/var/www/FlaskApp/FlaskApp/uploads/dog.jpeg", attachment_filename="doggie.jpeg")
+    except Exception as e:
+        return str(e)
+    
+## Site Map
 @app.route('/sitemap.xml/', methods=["GET"])
 def sitemap():
     try:
@@ -191,7 +245,8 @@ def sitemap():
         return response
     
     except Exception as e:
-        return(str(e))
+        return(str(e)) #remove for production
+    
 @app.route("/robots.txt")
 def robots():
     return("User-agent: \nDisallow: /login \nDisallow: /register")
