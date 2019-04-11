@@ -1,6 +1,14 @@
+@import url('https://fonts.googleapis.com/css?family=Fascinate+Inline|Roboto:500');
+
 h1 {
     color:red; /* this is a css comment! */
-    font-family: fantasy;
+    /* font-family: fantasy; */
+    font-family: 'Roboto', sans-serif; 
+}
+
+#wordmark {
+    /* DIGIT 400 Logo WordMark */
+    font-family: 'Fascinate Inline', cursive;
 }
 
 .loop { /*class selector!*/
