@@ -1,5 +1,6 @@
 from flask import Flask, render_template, url_for, flash, redirect, request, session, make_response, send_file
 from wtforms import Form, BooleanField, TextField, PasswordField, validators
+import sqlite3 as lite
 from passlib.hash import sha256_crypt
 from pymysql import escape_string as thwart
 from functools import wraps
@@ -9,6 +10,25 @@ import os, sys; sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 from werkzeug.utils import secure_filename
 from content import Content
 from db_connect import connection
+
+DATABASE = "/var/www/FlaskApp/FlaskApp/database_example/database_example.db"
+
+def message(user_name,message):
+    con = lite.connect(DATABASE)
+    c = con.cursor()
+    c.execute("CREATE TABLE IF NOT EXISTS input_log (id INTEGER PRIMARY KEY AUTOINCREMENT, user_name TEXT, message TEXT)")
+    c.execute("INSERT INTO input_log (user_name,message) VALUES (?,?)",(user_name, message))
+    con.commit()
+    c.close()
+    return
+
+def contents():
+    con = lite.connect(DATABASE)
+    c = con.cursor()
+    c.execute("SELECT * FROM input_log")
+    rows = c.fetchall() # there is also fetchone() this returns a list
+    con.close()
+    return rows
 
 UPLOAD_FOLDER = "/var/www/FlaskApp/FlaskApp/uploads"
 
@@ -228,7 +248,27 @@ def download():
         return send_file("/var/www/FlaskApp/FlaskApp/uploads/dog.jpeg", attachment_filename="doggie.jpeg")
     except Exception as e:
         return str(e)
+
+@app.route("/message/", methods=["GET", "POST"])
+@login_required
+def message_page():
+    try:
+        content = ""
+        if request.method == "POST":
+            data = thwart(request.form['message'])
+            name = session['username']
+            message(name,data)
+
+            content = contents()
+            flash("Thanks for the message.")
+            return render_template("message.html", content = content)
+
+        content = contents()
+        return render_template("message.html", content = content)
     
+    except Exception as e:
+        return str(e)
+
 ## Site Map
 @app.route('/sitemap.xml/', methods=["GET"])
 def sitemap():
