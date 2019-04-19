@@ -259,11 +259,11 @@ def message_page():
             name = session['username']
             message(name,data)
 
-            content = contents()
+            content = contents().reverse()
             flash("Thanks for the message.")
             return render_template("message.html", content = content)
 
-        content = contents()
+        content = contents().reverse()
         return render_template("message.html", content = content)
     
     except Exception as e:
