@@ -28,7 +28,7 @@ def contents():
     c.execute("SELECT * FROM input_log")
     rows = c.fetchall() # there is also fetchone() this returns a list
     con.close()
-    return reversed(rows)
+    return rows
 
 UPLOAD_FOLDER = "/var/www/FlaskApp/FlaskApp/uploads"
 
@@ -249,7 +249,7 @@ def download():
     except Exception as e:
         return str(e)
 
-@app.route("/messages/", methods=["GET", "POST"])
+@app.route("/message/", methods=["GET", "POST"])
 @login_required
 def message_page():
     try:
@@ -263,8 +263,7 @@ def message_page():
             flash("Thanks for the message.")
             return render_template("message.html", content = content)
 
-        content = contents()
-        return render_template("message.html", content = content)
+        content = contents().reverse()        return render_template("message.html", content = content)
     
     except Exception as e:
         return str(e)
