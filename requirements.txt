@@ -30,7 +30,7 @@ pagan==0.4.3
 parsedatetime==2.4
 passlib==1.7.1
 pbr==1.8.0
-Pillow==5.4.1
+Pillow==9.0.0
 prettytable==0.7.2
 pyasn1==0.1.9
 pycurl==7.43.0
